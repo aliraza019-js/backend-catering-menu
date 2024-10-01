@@ -1,4 +1,5 @@
 require('dotenv').config();
+const mongoose = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -6,18 +7,54 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
-const { generateInvoice } = require('./generateInvoice'); // Import the generateInvoice function
+const { generateInvoice } = require('./generateInvoice');
+
+const authRoutes = require('./src/routes/authRoutes');
+const userRoutes = require('./src/routes/userRoutes');
+const { authenticate, authorize } = require('./src/middleware/authMiddleware');
+const { ROLES } = require('./src/config/roles');
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(cors({ origin: process.env.APP_ENV }));
 
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+
+const uri = 'mongodb://localhost:27017/cateringOrders';
+
+// MongoDB Connection
+mongoose.connect(uri)
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch((err) => console.error('MongoDB connection error:', err));
+
+// Define an Order schema
+const orderSchema = new mongoose.Schema({
+  customer: {
+    name: String,
+    email: String,
+    address: String,
+  },
+  items: Array,
+  totalAmount: Number,
+  status: { type: String, default: 'Pending' },
+  createdAt: { type: Date, default: Date.now },
+});
+
+const Order = mongoose.model('Order', orderSchema);
+
 let orderInfo = null;
 
-app.post('/api/order', (req, res) => {
+app.post('/api/order', authenticate, authorize([ROLES.USER, ROLES.ADMIN]), async(req, res) => {
   orderInfo = req.body;
-  res.status(200).json({ message: 'Order information received' });
+  try {
+    const newOrder = new Order(orderData);
+    await newOrder.save();
+    res.status(200).json({ message: 'Order saved to MongoDB' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save order' });
+  }
 });
 
 app.post("/create-checkout-session", async (req, res) => {
