@@ -13,14 +13,18 @@ const authRoutes = require('./src/routes/authRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const { authenticate, authorize } = require('./src/middleware/authMiddleware');
 const { ROLES } = require('./src/config/roles');
+const orderRoutes = require('./src/routes/orderRoutes');
 
 const app = express();
 
 app.use(bodyParser.json());
-app.use(cors({ origin: process.env.APP_ENV }));
+// app.use(cors({ origin: process.env.APP_ENV }));
+app.use(cors());
+
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/orders', orderRoutes);
 
 const uri = 'mongodb://localhost:27017/cateringOrders';
 
@@ -42,20 +46,20 @@ const orderSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const Order = mongoose.model('Order', orderSchema);
+// const Order = mongoose.model('Order', orderSchema);
 
 let orderInfo = null;
 
-app.post('/api/order', authenticate, authorize([ROLES.USER, ROLES.ADMIN]), async(req, res) => {
-  orderInfo = req.body;
-  try {
-    const newOrder = new Order(orderData);
-    await newOrder.save();
-    res.status(200).json({ message: 'Order saved to MongoDB' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to save order' });
-  }
-});
+// app.post('/api/order', authenticate, authorize([ROLES.USER, ROLES.ADMIN]), async(req, res) => {
+//   orderInfo = req.body;
+//   try {
+//     const newOrder = new Order(orderData);
+//     await newOrder.save();
+//     res.status(200).json({ message: 'Order saved to MongoDB' });
+//   } catch (err) {
+//     res.status(500).json({ error: 'Failed to save order' });
+//   }
+// });
 
 app.post("/create-checkout-session", async (req, res) => {
   const { items, tipAmount, tax } = req.body;
