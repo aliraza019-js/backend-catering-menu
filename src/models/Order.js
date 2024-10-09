@@ -6,13 +6,7 @@ const orderDetailSchema = new mongoose.Schema({
     email: { type: String, required: true },
     phone: { type: String, required: true },
   },
-  items: [
-    {
-      product: { type: String, required: true },
-      quantity: { type: Number, required: true },
-      price: { type: Number, required: true },
-    },
-  ],
+  items: {type:Array,required:true},
   totalAmount: { type: Number, required: true },
   tip: { type: Number, default: 0 },
   tax: { type: Number, default: 0 },
