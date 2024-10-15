@@ -14,6 +14,7 @@ const userRoutes = require('./src/routes/userRoutes');
 const { authenticate, authorize } = require('./src/middleware/authMiddleware');
 const { ROLES } = require('./src/config/roles');
 const orderRoutes = require('./src/routes/orderRoutes');
+const customerRoutes =  require('./src/routes/customersRoute')
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use(cors());
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/customers', customerRoutes);
 
 const uri = 'mongodb://localhost:27017/cateringOrders';
 
