@@ -52,6 +52,42 @@ const orderSchema = new mongoose.Schema({
 
 let orderInfo = null;
 
+app.get('/api/products', async (req, res) => {
+  const {query} = req
+  try {
+    const products = await stripe.products?.list({
+      limit: query.limit,
+    });
+    const prices = await stripe.prices?.list({
+      limit: query.limit,
+    });
+  //   console.log('products', products.data.length)
+
+  // getting products data using limits
+    const productData = products.data.map(product => {
+      const productPrices = prices.data.filter(price => price.product === product.id);
+      return {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        image: product.images[0],
+        category: product?.metadata.category, // Include metadata here
+        price: (productPrices[0]?.unit_amount / 100).toFixed(2),
+      //   features: product.marketing_features,
+        prices: productPrices.map(price => ({
+          id: price.id,
+          currency: price.currency,
+          unit_amount: (productPrices[0]?.unit_amount / 100).toFixed(2),
+        })),
+      };
+    });
+
+    res.json(productData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // app.post('/api/order', authenticate, authorize([ROLES.USER, ROLES.ADMIN]), async(req, res) => {
 //   orderInfo = req.body;
 //   try {
