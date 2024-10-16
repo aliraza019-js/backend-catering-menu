@@ -21,7 +21,7 @@ const app = express();
 app.use(bodyParser.json());
 // app.use(cors({ origin: process.env.APP_ENV }));
 app.use(cors({
-  origin: ['https://vcaterings.com', 'http://localhost:3000'], // Add your frontend URL and localhost for development
+  origin: ['https://vcaterings.com', 'http://localhost:8080'], // Add your frontend URL and localhost for development
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true, // This allows cookies to be sent with the request if needed
