@@ -3,9 +3,24 @@ const Customer = require('../models/Customer');
 
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await OrderDetails.find();
+    // Set default pagination values
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    console.time("Fetching Orders");
+    
+    // Fetch orders with pagination and optimization using lean()
+    const orders = await OrderDetails.find()
+      .limit(limit)        // Implement pagination
+      .skip((page - 1) * limit)
+      .lean();             // Use lean() for performance boost
+
+    console.timeEnd("Fetching Orders");
+
+    // Return the paginated list of orders
     return res.status(200).json(orders);
   } catch (err) {
+    console.error("Error fetching orders:", err); // Log the error
     return res.status(500).json({ error: err.message });
   }
 };
